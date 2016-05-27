@@ -1,5 +1,8 @@
 .python-version
 
+data/*
+!data/.gitkeep
+
 
 ### JetBrains
 
