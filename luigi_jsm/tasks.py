@@ -11,19 +11,25 @@ q = jsm.Quotes()
 
 
 class LoadPricesWorkflow(luigi.WrapperTask):
+    """
+    銘柄・株価を取得するワークフロー
+    """
     date = luigi.DateParameter(default=datetime.date.today())
 
     def requires(self):
-        task = ExtractBrandsTask(date=self.date)
-        yield task
+        return ExtractBrandsTask(date=self.date)
 
-        df = pd.read_csv(task.output().path, index_col='code')
+    def run(self):
+        df = pd.read_csv(self.input().path, index_col='code')
         codes = list(df.head().index)
         for code in codes:
             yield ExtractPriceTask(date=self.date, code=code)
 
 
 class MakeDateDirTask(luigi.Task):
+    """
+    与えられた日付のディレクトリを作成するタスク
+    """
     date = luigi.DateParameter()
 
     def output(self):
@@ -34,6 +40,9 @@ class MakeDateDirTask(luigi.Task):
 
 
 class ExtractBrandsTask(luigi.Task):
+    """
+    情報・通信業界の銘柄をCSVで保存するタスク
+    """
     date = luigi.DateParameter()
 
     def requires(self):
@@ -52,6 +61,9 @@ class ExtractBrandsTask(luigi.Task):
 
 
 class ExtractPriceTask(luigi.Task):
+    """
+    指定した銘柄の過去一週間の株価をCSVで保存するタスク
+    """
     date = luigi.DateParameter()
     code = luigi.IntParameter()
 
